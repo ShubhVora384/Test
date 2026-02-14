@@ -1,31 +1,29 @@
-# main.py
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI()
 
-# static in-memory data
-users = {
-    1: {"name": "Alice", "age": 25},
-    2: {"name": "Bob", "age": 30}
-}
+class User(BaseModel):
+    name: str
+    age: int
 
-# GET - Read
+users = {}
+
 @app.get("/users")
 def get_users():
     return users
 
-# POST - Create
 @app.post("/users")
-def create_user(user_id: int, name: str, age: int):
+def create_user(user_id: int, user: User):
     if user_id in users:
         raise HTTPException(status_code=400, detail="User already exists")
-    users[user_id] = {"name": name, "age": age}
+    users[user_id] = user.dict()
     return {"message": "User created", "user": users[user_id]}
 
-# PUT - Update
 @app.put("/users/{user_id}")
-def update_user(user_id: int, name: str, age: int):
+def update_user(user_id: int, user: User):
     if user_id not in users:
         raise HTTPException(status_code=404, detail="User not found")
-    users[user_id] = {"name": name, "age": age}
+    users[user_id] = user.dict()
     return {"message": "User updated", "user": users[user_id]}
+
